@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/nosremetnarg/employeeTracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "inquirer": "^7.3.3",
-    "jest": "^26.4.1"
+    "jest": "^26.4.1",
+    "mysql2": "^2.1.0"
   }
 }
