@@ -6,6 +6,7 @@ const Department = require("./lib/department");
 
 // Main function to run application
 async function main() {
+    
     try {
         await prompt()
     } catch (err) {

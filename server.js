@@ -14,6 +14,7 @@ const connection = mysql.createConnection({
   database: 'employeeDB'
 });
 
+
 connection.connect(err => {
   if (err) throw err;
   console.log('connected as id ' + connection.threadId);
@@ -86,7 +87,14 @@ async function viewRoles() {
 // view all employees
 async function viewEmployees() {
   connection.query(
-    `SELECT * FROM employee`, function (err, data) {
+    `SELECT first_name AS "First Name", last_name AS "Last Name", 
+    role_employee.title AS Role, role_employee.salary 
+    AS Salary, department.department_name AS Department 
+    FROM employee 
+    INNER JOIN department 
+    ON department.id = employee.role_id 
+    LEFT JOIN role_employee on role_employee.id = employee.role_id`, 
+    function (err, data) {
       if (err) throw err;
       console.table(data)
       start();
