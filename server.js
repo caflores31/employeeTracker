@@ -31,6 +31,7 @@ async function start() {
         "View all departments",
         "View all roles",
         "View all employees",
+        "View all employees by Manager",
         "Add a department",
         "Add a role",
         "Add an employee",
@@ -48,6 +49,9 @@ async function start() {
           break;
         case "View all employees":
           viewEmployees() // made 
+          break;
+        case "View all employees by Manager":
+          viewEmployeesByManager() // made 
           break;
         case "Add a department":
           addDepartment() // made
@@ -97,7 +101,7 @@ async function viewEmployees() {
   connection.query(
     `SELECT first_name AS "First Name", last_name AS "Last Name", 
     role_employee.title AS Role, role_employee.salary 
-    AS Salary, department.department_name AS Department 
+    AS Salary, department.department_name AS Department
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id 
@@ -109,6 +113,17 @@ async function viewEmployees() {
     }
   )
 };
+
+// ================================ working on this now =======
+// view employees by manager
+async function viewEmployeesByManager() {
+  connection.query(` `, 
+  function(err, data) {
+    if (err) throw err;
+    console.table(data)
+    start();
+  })
+}
 
 // add a department
 async function addDepartment() {
@@ -158,43 +173,43 @@ async function addRole() {
 async function addEmployee() {
   connection.query("SELECT * FROM role_employee", function (err, results) {
     if (err) throw err;
-  
-  inquirer.prompt([
-    {
-      type: "input",
-      name: "first_name",
-      message: "enter the employee's first name: "
-    },
-    {
-      type: "input",
-      name: "last_name",
-      message: "enter the employee's last name: "
-    },
-    {
-      name: "choice",
-      type: "rawlist",
-      message: "what is the employee's role?",
-      choices: function () {
-        var choiceArray = [];
-        for (let i = 0; i < results.length; i++) {
-          choiceArray.push(results[i].title)
+
+    inquirer.prompt([
+      {
+        type: "input",
+        name: "first_name",
+        message: "enter the employee's first name: "
+      },
+      {
+        type: "input",
+        name: "last_name",
+        message: "enter the employee's last name: "
+      },
+      {
+        name: "choice",
+        type: "rawlist",
+        message: "what is the employee's role?",
+        choices: function () {
+          var choiceArray = [];
+          for (let i = 0; i < results.length; i++) {
+            choiceArray.push(results[i].title)
+          }
+          return choiceArray;
         }
-        return choiceArray;
+      },
+      {
+        type: "input",
+        name: "manager",
+        message: "who is the employee's manager?"
       }
-    },
-    {
-      type: "input",
-      name: "manager",
-      message: "who is the employee's manager?"
-    }
-  ])
-    .then(function (answer) {
-      for (var i=0; i < results.length; i++) {
-        if(results[i].title === answer.choice) {
+    ])
+      .then(function (answer) {
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].title === answer.choice) {
             answer.role_id = results[i].id;
+          }
         }
-    }
-      var query = "INSERT INTO employee SET ?"
+        var query = "INSERT INTO employee SET ?"
         const values = {
           first_name: answer.firstName,
           last_name: answer.lastName,
@@ -202,12 +217,12 @@ async function addEmployee() {
           // manager_id = answer.manager,
         }
 
-      connection.query(query, values, function (err, result) {
-        if (err) throw err;
-        console.log(answer.first_name + " has been added to employee list");
-        start();
-      })
-    });
+        connection.query(query, values, function (err, result) {
+          if (err) throw err;
+          console.log(answer.first_name + " has been added to employee list");
+          start();
+        })
+      });
   })
 }
 

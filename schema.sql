@@ -32,3 +32,4 @@ CREATE TABLE employee (
     CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES role_employee(id) ON DELETE CASCADE,
     PRIMARY KEY (id)
 );
+

@@ -71,7 +71,8 @@ function viewEmployees() {
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id 
-    LEFT JOIN employee_role on employee_role.id = employee.role_id`, function(err, data) { 
+    LEFT JOIN employee_role on employee_role.id = employee.role_id`, 
+    function(err, data) { 
         if (err) throw err;
         console.table(data)
         start();
