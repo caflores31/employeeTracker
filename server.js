@@ -77,8 +77,14 @@ async function viewDepartments() {
 // view all roles
 async function viewRoles() {
   connection.query(
-    `SELECT title AS "Employee Role"
-    FROM role_employee`, function (err, data) {
+    `SELECT role_employee.id AS ID, title AS "Employee Role", role_employee.salary
+    AS Salary, department_id AS "Dept #", title AS "Department"
+    FROM role_employee
+    INNER JOIN department
+    ON department.id = department_id
+    
+
+    `, function (err, data) {
     if (err) throw err;
     console.table(data)
     start();
