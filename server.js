@@ -65,22 +65,24 @@ async function start() {
 // view all departments
 async function viewDepartments() {
   connection.query(
-    `SELECT * FROM department`, function (err, data) {
-      if (err) throw err;
-      console.table(data)
-      start();
-    }
+    `SELECT id AS ID, department_name AS "Department Name"
+    FROM department`, function (err, data) {
+    if (err) throw err;
+    console.table(data)
+    start();
+  }
   )
 };
 
 // view all roles
 async function viewRoles() {
   connection.query(
-    `SELECT title FROM role_employee`, function (err, data) {
-      if (err) throw err;
-      console.table(data)
-      start();
-    }
+    `SELECT title AS "Employee Role"
+    FROM role_employee`, function (err, data) {
+    if (err) throw err;
+    console.table(data)
+    start();
+  }
   )
 };
 
@@ -93,7 +95,7 @@ async function viewEmployees() {
     FROM employee 
     INNER JOIN department 
     ON department.id = employee.role_id 
-    LEFT JOIN role_employee on role_employee.id = employee.role_id`, 
+    LEFT JOIN role_employee on role_employee.id = employee.role_id`,
     function (err, data) {
       if (err) throw err;
       console.table(data)
@@ -112,10 +114,10 @@ async function addDepartment() {
     }
   ])
     .then(function (answer) {
-      var query = connection.query("INSERT INTO department (department_name) VALUES (?)", 
-      [department_name = answer.title],
-        
-        function(err, result) {
+      var query = connection.query("INSERT INTO department (department_name) VALUES (?)",
+        [department_name = answer.title],
+
+        function (err, result) {
           if (err) throw err;
           console.log(answer.title + " has been added to department list")
           start();
@@ -133,10 +135,10 @@ async function addRole() {
     }
   ])
     .then(function (answer) {
-      var query = connection.query("INSERT INTO role_employee (title) VALUES (?)", 
-      [title = answer.title],
-        
-        function(err, result) {
+      var query = connection.query("INSERT INTO role_employee (title) VALUES (?)",
+        [title = answer.title],
+
+        function (err, result) {
           if (err) throw err;
           console.log(answer.title + " has been added to role list")
           start();
@@ -145,52 +147,62 @@ async function addRole() {
 }
 
 
-////  this doesn't work yet =============================
-// // add an employee 
-// async function addEmployee() {
-//   inquirer.prompt([
-//     {
-//       type: "input",
-//       name: "first_name",
-//       message: "enter the employee's first name: "
-//     },
-//     {
-//       type: "input",
-//       name: "last_name",
-//       message: "enter the employee's last name: "
-//     },
-//     {
-//       type: "list",
-//       name: "role_id",
-//       message: "enter the employee's role: ",
-//       choices: ['Data Analyst',
-//         'FrontEnd Developer',
-//         'Manager',
-//         'Sales Representative',
-//         'Software Engineer',
-//         'HR Manager']
-//     },
-//     {
-//       type: "list",
-//       name: "manager_id",
-//       message: "enter the employee's manager: ",
-//       choices: ['Data Analyst',
-//         'HR Manager']
-//     },
-//   ])
-//     .then(function (answer) {
-//       const sql = connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ?, ?, ?, ?`),
-//           [first_name = answer.first_name,
-//           last_name = answer.last_name,
-//           role_id = answer.role_id, 
-//           manager_id = answer.manager],
-          
-//         function (err, result) {
-//           if (err) throw err;
-//           console.log(answer.first_name + " has been added to employee list");
-//           start();
-//         }
-//     })
-// }
+//  this doesn't work yet =============================
+// add an employee 
+async function addEmployee() {
+  connection.query("SELECT * FROM role_employee", function (err, results) {
+    if (err) throw err;
+  
+  inquirer.prompt([
+    {
+      type: "input",
+      name: "first_name",
+      message: "enter the employee's first name: "
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "enter the employee's last name: "
+    },
+    {
+      name: "choice",
+      type: "rawlist",
+      message: "what is the employee's role?",
+      choices: function () {
+        var choiceArray = [];
+        for (let i = 0; i < results.length; i++) {
+          choiceArray.push(results[i].title)
+        }
+        return choiceArray;
+      }
+    },
+    {
+      type: "input",
+      name: "manager",
+      message: "who is the employee's manager?"
+    }
+  ])
+    .then(function (answer) {
+      for (var i=0; i < results.length; i++) {
+        if(results[i].title === answer.choice) {
+            answer.role_id = results[i].id;
+        }
+    }
+      var query = "INSERT INTO employee SET ?"
+        const values = {
+          first_name: answer.firstName,
+          last_name: answer.lastName,
+          role_id: answer.role_id,
+          // manager_id = answer.manager,
+        }
+
+      connection.query(query, values, function (err, result) {
+        if (err) throw err;
+        console.log(answer.first_name + " has been added to employee list");
+        start();
+      })
+    });
+  })
+}
 
 
