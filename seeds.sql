@@ -3,7 +3,10 @@ VALUES
 ('BACKEND DEV'),
 ('FRONTEND DEV'),
 ('MANAGER'),
-('SALES');
+('SALES'),
+('FINANCE'),
+('RESEARCH'),
+('ADVERTISING');
 
 INSERT INTO role_employee (title, salary, department_id)
 VALUES
@@ -25,3 +28,11 @@ VALUES
 ('Jon', 'Prine', 4, 1),
 ('Sharee', 'Burkeen', 4, 1),
 ('Taylor', 'Nyquist', 3, 1);
+
+{
+        name: "choice",
+        type: "rawlist",
+        message: "who is the employee's manager?",
+        choices: managerList
+        
+      }

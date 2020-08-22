@@ -35,7 +35,13 @@ async function start() {
         "Add a department",
         "Add a role",
         "Add an employee",
-        "Update an employee role"
+        "Update an employee role",
+        'Remove Employee',
+        'Remove Department',
+        'Remove Role',
+        'View All Employees by Department',
+        'View all Employees by Manager',
+        'Update Employee Manager'
       ]
     }
   ])
@@ -51,7 +57,7 @@ async function start() {
           viewEmployees() // made 
           break;
         case "View all employees by Manager":
-          viewEmployeesByManager() // made 
+          viewEmployeesByManager() // working on this 
           break;
         case "Add a department":
           addDepartment() // made
@@ -61,6 +67,27 @@ async function start() {
           break;
         case "Add an employee":
           addEmployee() // needs work
+          break;
+        case "Update Employee Role":
+          updateRole() // toDo
+          break;
+        case "Remove Employee":
+          removeEmployee() // toDo
+          break;
+        case "Remove Department":
+          removeDept() // toDo
+          break;
+        case "Remove Role":
+          removeRole() // toDo
+          break;
+        case "View All Employees by Department":
+          employeesByDep() // toDo
+          break;
+        case "View All Employees by Manager":
+          employeesByMan() // toDo
+          break;
+        case "Update Employee Manager":
+          updateManager() // toDo
           break;
       }
     })
@@ -85,14 +112,12 @@ async function viewRoles() {
     AS Salary, department_id AS "Dept #", title AS "Department"
     FROM role_employee
     INNER JOIN department
-    ON department.id = department_id
-    
-
-    `, function (err, data) {
-    if (err) throw err;
-    console.table(data)
-    start();
-  }
+    ON department.id = department_id`,
+    function (err, data) {
+      if (err) throw err;
+      console.table(data)
+      start();
+    }
   )
 };
 
@@ -117,12 +142,19 @@ async function viewEmployees() {
 // ================================ working on this now =======
 // view employees by manager
 async function viewEmployeesByManager() {
-  connection.query(` `, 
-  function(err, data) {
-    if (err) throw err;
-    console.table(data)
-    start();
-  })
+  connection.query(`SELECT first_name AS "First Name", 
+  last_name AS "Last Name", 
+  role_employee.title AS Role, role_employee.salary 
+  AS Salary, department.department_name AS Department
+  FROM employee 
+  INNER JOIN department 
+  ON department.id = employee.role_id 
+  LEFT JOIN role_employee on role_employee.id = employee.role_id`,
+    function (err, data) {
+      if (err) throw err;
+      console.table(data)
+      start();
+    })
 }
 
 // add a department
@@ -147,82 +179,155 @@ async function addDepartment() {
 }
 
 // add a role
-async function addRole() {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: "title",
-      message: "enter new role name: "
-    }
-  ])
-    .then(function (answer) {
-      var query = connection.query("INSERT INTO role_employee (title) VALUES (?)",
-        [title = answer.title],
+function addRole() {
+  var roleQuery = "SELECT * FROM role_employee;";
+  var departmentQuery = "SELECT * FROM department;";
 
-        function (err, result) {
+  connection.query(roleQuery, function (err, roles) {
+    connection.query(departmentQuery, function (err, department) {
+
+      if (err) throw err;
+
+      inquirer.prompt([
+
+        {
+          name: "newRole",
+          type: "input",
+          message: ["what role would you like to add?"]
+        },
+        {
+          name: "newSalary",
+          type: "input",
+          message: "What is the salary you would like to add?"
+        },
+        {
+          name: "choice",
+          type: "rawlist",
+          choices: function () {
+            var arrayOfChoices = [];
+            for (var i = 0; i < department.length; i++) {
+              arrayOfChoices.push(department[i].department_name);
+            }
+
+            return arrayOfChoices;
+          },
+          message: "which department does this role belong to?"
+        },
+      ]).then(function (answer) {
+        for (var i = 0; i < department.length; i++) {
+          if (department[i].department_name === answer.choice) {
+            answer.department_id = department[i].id;
+          }
+        }
+        var query = "INSERT INTO role_employee SET ?"
+        const values = {
+          title: answer.newRole,
+          salary: answer.newSalary,
+          department_id: answer.department_id
+        }
+        connection.query(query, values, function (err) {
           if (err) throw err;
-          console.log(answer.title + " has been added to role list")
+          console.table("role created!");
           start();
         })
+      })
     })
-}
+  })
+};
 
+// Update Employee Role
+function updateRole() {
+  inquirer.prompt([
+    {
+      name: "updateRole",
+      type: "input",
+      message: ["what role would you like to add?"]
+    },
+  ]).then(function (answer) {
+    var query = "INSERT INTO employee_role SET ?"
+    var addRole = connection.query(query, [{ title: answer.newRole }], function (err) {
+      if (err) throw err;
+      console.table("role created!");
+      start()
+    })
+  })
+};
+
+
+const employeeList = () => new Promise ((resolve, reject) => {
+  connection.query("SELECT CONCAT(first_name,' ',last_name) AS NAME FROM employee WHERE role_id = 3",  (err, results) => {
+    if (err) throw err;
+
+    return resolve(results);
+  })
+})
 
 //  this doesn't work yet =============================
 // add an employee 
 async function addEmployee() {
-  connection.query("SELECT * FROM role_employee", function (err, results) {
+  connection.query("SELECT * FROM role_employee", async function (err, results) {
     if (err) throw err;
+
+    const rolesList = results.map(function (item) {
+      return item.title;
+    })
+
+    // console.log(rolesList);
+    const employees = await employeeList();
+    // console.log(employees);
+
+    const managerList = employees.map(function (item) {
+      return item.NAME
+    })
+    console.log(managerList);
 
     inquirer.prompt([
       {
         type: "input",
-        name: "first_name",
+        name: "firstName",
         message: "enter the employee's first name: "
       },
       {
         type: "input",
-        name: "last_name",
+        name: "lastName",
         message: "enter the employee's last name: "
       },
       {
         name: "choice",
         type: "rawlist",
         message: "what is the employee's role?",
-        choices: function () {
-          var choiceArray = [];
-          for (let i = 0; i < results.length; i++) {
-            choiceArray.push(results[i].title)
-          }
-          return choiceArray;
-        }
+        choices: rolesList
       },
       {
-        type: "input",
-        name: "manager",
-        message: "who is the employee's manager?"
+        name: "choice2",
+        type: "rawlist",
+        message: "who is the employee's manager?",
+        choices: managerList
       }
     ])
       .then(function (answer) {
+        // let manager = managers.find(obj => obj.Manager === answers.manager);
         for (var i = 0; i < results.length; i++) {
           if (results[i].title === answer.choice) {
             answer.role_id = results[i].id;
           }
         }
+
         var query = "INSERT INTO employee SET ?"
         const values = {
           first_name: answer.firstName,
           last_name: answer.lastName,
           role_id: answer.role_id,
-          // manager_id = answer.manager,
+          // manager_id: answer.manager,
         }
 
         connection.query(query, values, function (err, result) {
           if (err) throw err;
-          console.log(answer.first_name + " has been added to employee list");
+          console.log(answer.firstName + " has been added to employee list");
           start();
         })
       });
+
   })
 }
 
