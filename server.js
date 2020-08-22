@@ -66,7 +66,7 @@ async function start() {
           addRole() // made
           break;
         case "Add an employee":
-          addEmployee() // needs work
+          addEmployee() // made
           break;
         case "Update Employee Role":
           updateRole() // toDo
@@ -139,7 +139,6 @@ async function viewEmployees() {
   )
 };
 
-// ================================ working on this now =======
 // view employees by manager
 async function viewEmployeesByManager() {
   connection.query(`SELECT first_name AS "First Name", 
@@ -253,16 +252,15 @@ function updateRole() {
   })
 };
 
-
-const employeeList = () => new Promise ((resolve, reject) => {
-  connection.query("SELECT CONCAT(first_name,' ',last_name) AS NAME FROM employee WHERE role_id = 3",  (err, results) => {
+// creates promise to collect managers
+const employeeList = () => new Promise((resolve, reject) => {
+  connection.query("SELECT CONCAT(first_name,' ',last_name) AS NAME FROM employee WHERE role_id = 3", (err, results) => {
     if (err) throw err;
 
     return resolve(results);
   })
 })
 
-//  this doesn't work yet =============================
 // add an employee 
 async function addEmployee() {
   connection.query("SELECT * FROM role_employee", async function (err, results) {
@@ -279,7 +277,7 @@ async function addEmployee() {
     const managerList = employees.map(function (item) {
       return item.NAME
     })
-    console.log(managerList);
+    // console.log(managerList);
 
     inquirer.prompt([
       {
@@ -306,7 +304,6 @@ async function addEmployee() {
       }
     ])
       .then(function (answer) {
-        // let manager = managers.find(obj => obj.Manager === answers.manager);
         for (var i = 0; i < results.length; i++) {
           if (results[i].title === answer.choice) {
             answer.role_id = results[i].id;
@@ -318,7 +315,7 @@ async function addEmployee() {
           first_name: answer.firstName,
           last_name: answer.lastName,
           role_id: answer.role_id,
-          // manager_id: answer.manager,
+          manager_id: answer.manager,
         }
 
         connection.query(query, values, function (err, result) {
@@ -331,4 +328,163 @@ async function addEmployee() {
   })
 }
 
+
+// // creates promise to collect all employees
+// const employeeCompleteList = () => new Promise((resolve, reject) => {
+//   connection.query("SELECT CONCAT(first_name,' ',last_name) AS NAME FROM employee", (err, results) => {
+//     if (err) throw err;
+
+//     return resolve(results);
+//   })
+// })
+// // delete employee
+// async function removeEmployee() {
+//   connection.query("SELECT * FROM employee", async function (err, results) {
+//     if (err) throw err;
+
+//     const employeesCompleteList = await employeeCompleteList();
+
+//     // console.log(employeesCompleteList);
+
+//     const employeeList = employeesCompleteList.map(function (item) {
+//       return item.NAME
+//     })
+//     // console.log(employeeList);
+
+//     inquirer.prompt([
+//       {
+//         name: "removeEmployee",
+//         type: "rawlist",
+//         message: "which employee would you like to remove? ",
+//         choices: employeeList
+//       }
+//     ]).then(function (answer) {
+//       for (var i = 0; i < results.length; i++) {
+//         if (results[i].firstName === answer.choice) {
+//           answer.firstName = results[i].firstName;
+//         }
+//       }
+//     console.log(answer.removeEmployee);
+//       var query = "DELETE FROM employee WHERE ?"
+//       const values = {
+//         first_name: answer.firstName
+//       }
+//       // console.log(answer.removeRole)
+
+//       connection.query(query, values, function (err, result) {
+//         if (err) throw err;
+//         console.log(answer.removeEmployee + " has been removed from employee list");
+//         start();
+//       })
+//     })
+//   })
+// }
+
+// collect list of employees
+const employeeFullList = () => new Promise((resolve, reject) => {
+  connection.query("SELECT CONCAT(first_name,' ',last_name) AS NAME FROM employee", (err, results) => {
+    if (err) throw err;
+
+    return resolve(results);
+  })
+})
+//function to delete employee -- working but want to show more employee info
+function removeEmployee() {
+  var employeeQuery = "SELECT * FROM employee;";
+
+  connection.query(employeeQuery, function (err, employees) {
+          if (err) throw err;
+
+          inquirer.prompt([ 
+              
+              {
+                  name: "removeEmployee",
+                  type: "rawlist",
+                  choices: function() {
+                      var arrayOfChoices = [];
+                      for (var i = 0; i < employees.length; i++) {
+                          arrayOfChoices.push(employees[i].last_name);
+                      }
+                      
+                      return arrayOfChoices;
+              },
+                  message: "which employee would you like to rmemove?",
+
+          }
+  ]).then (function(answer) {
+      connection.query("DELETE FROM employee WHERE ?", 
+  {
+      last_name: answer.removeEmployee
+  },
+  function(error) { 
+      //fix console
+      console.log(answer.removeEmployee + " has been deleted from your employees");
+      start();
+  }
+  );
+})
+})
+}
+
+
+// Update Employee Role -- you gotta figure it out bish
+// function updateRole() {
+//   let employeeQuery = "SELECT * FROM employee";
+//   let roleQuery = "SELECT * from employee_role";
+//   connection.query(employeeQuery, function (err, employees) {
+//      connection.query(roleQuery, function (err, roles) {
+//          if(err) throw err;
+//          inquirer.prompt([ 
+//              {
+//                  name: "employeeName",
+//                  type: "rawlist",
+//                  message: "which employee's role do you need to update?",
+//                  choices: function() {
+//                      let choiceArray = [];
+//                      for (var i=0; i < employees.length; i++) {
+//                          choiceArray.push(employees[i].last_name)
+//                      }
+//                      return choiceArray;
+//                  }
+//              },
+//          {
+//              name: "newRole",
+//              type: "rawlist",
+//              message: "what is the employee's new role?",
+//              choices: function() {
+//                  let choiceArray = [];
+//                  for (var i=0; i < roles.length; i++) {
+//                      choiceArray.push(roles[i].title)
+//                  }
+//                  return choiceArray;
+//              }
+//          },
+//      ]) .then(function(response) {
+//          for (var i=0; i < roles.length; i++) {
+//              if(roles[i].title === response.employeeName) {
+//                  response.role_id = roles[i].id;
+//              }
+//          }
+//          for (var i=0; i < employees.length; i++) {
+//              if(employees[i].last_name === response.newRole) {
+//                  response.last_name = employees[i].id;
+//              }
+//          }
+//          console.log(response)
+//          var query = `UPDATE employee SET employee.role_id = ? 
+//          WHERE employee.last_name = ?`
+//          const values = {
+//              role_id: response.newRole,
+//              last_name: response.employeeName
+//          }
+//          console.log(values)
+//          connection.query(query, values, function(err) {
+//              if(err) throw err;
+//              console.log("Employee added!");
+//              start();
+//          })
+//          });
+//      })
+//  });
+//  }
 
