@@ -9,6 +9,7 @@
 
 ![jQuery](https://img.shields.io/badge/-jQuery-brightgreen) ![javascript](https://img.shields.io/badge/-javascript-green) ![node JS](https://img.shields.io/badge/-nodeJS-yellowgreen) ![inquirer](https://img.shields.io/badge/-inquirer-yellow) ![jest](https://img.shields.io/badge/-jest-yellow) ![coffee](https://img.shields.io/badge/-coffee-red) ![mySQL](https://img.shields.io/badge/-MySQL-red)
 
+***[Walkthrough video](https://drive.google.com/file/d/124VHCDtuRnN7kyp-ghlY28bm3sHUsL5u/view)***
 
 ## User Story
 ```
