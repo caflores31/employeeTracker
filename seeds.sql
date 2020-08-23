@@ -13,7 +13,7 @@ VALUES
 ('Data Analyst', 80000, 1),
 ('FrontEnd Developer', 50000, 2),
 ('Manager', 90000, 3),
-('Softward Engineer', 80000, 4),
+('Software Engineer', 80000, 4),
 ('HR Manager', 60000, 5),
 ('Sales Representative', 65000, 6);
 
